@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="google-signin-scope" content="profile email">
+    <meta name="google-signin-client_id" content="1085207145962-3l082bdi3c5fmtfg3k13n97qg5rab707.apps.googleusercontent.com">
+    <link rel="stylesheet" href="assets/styles/styles.css">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat&display=swap" rel="stylesheet">
+</head>
+<body>
+<nav id="main-nav">
+    <div>
+        <a href="./index.html">
+            <img id="top-logo" class="logo" href="./index.html" src="assets/media/img/general/jpg/down-to-town-logo.jpg">
+            <img class="logo" href="./index.html" src="assets/media/img/general/jpg/down-to-town-logo-bright.jpg">
+        </a>
+    </div>
+    <ul class="nav-elements">
+        <li class="nav-list">
+            <a class="nav-elem" href="index.html">Home</a>
+            <a class="nav-elem" id="nav-elem-trips" href="trips.html">Trips</a>
+            <a class="nav-elem">
+                <article id="notification-bell">
+                    <div id="notifier"></div>
+                    <img id="notification" src="assets/media/img/general/png/bell.png">
+                </article>
+            </a>
+            <article id="notification-container">
+                <p>Deine Benachrichtigungen:</p>
+                <ul id="notification-list">
+                </ul>
+            </article>
+            <article id="user-container">
+                <div class="g-signin2" data-onsuccess="onSignIn" data-theme="dark"></div>
+            </article>
+        </li>
+    </ul>
+</nav>
+<section id="trips">
+    <article id="trip-results-wrapper" class="trip-details-pane">
+        <section id="search-results-details-wrapper" class="trips-search-results-details">
+            <article>
+                <div id="result-basics">
+                    <div id="result-img-wrapper">
+                        <img id="hotel-img-result" class="result-basics-img">
+                    </div>
+                    <div>
+                        <h2 id="trip-name" class="text-grey"></h2>
+                        <p id="trip-desc-gen" class="text-black"></p>
+                        <p id="trip-price" class="result-price"><span>ab</span></p>
+                    </div>
+                </div>
+                <div id="event-details-wrapper-box">
+                    <h3 class="small-heading">Zimmerdetails</h3>
+                    <p id="room-details" class="text-black"></p>
+                    <h3 class="small-heading">Zusätzliche Reiseinformationen</h3>
+                    <p id="travel-information" class="text-black"></p>
+                </div>
+            </article>
+        </section>
+    </article>
+</section>
+
+<script src="core/templates.js"></script>
+<script src="core/interaction.js"></script>
+<script src="core/auth.js"></script>
+<script src="https://apis.google.com/js/platform.js" async defer></script>
+<script>
+    //globals
+    var links = [];
+    var root = "http://eventravel.online";
+    var eventIds = [];
+    var eventResults = [];
+    var triggered = false;
+    var userToggle = false;
+    var tripLinks = [];
+    var user = sessionStorage.getItem('token');
+    console.log(user);
+
+    var toggle = false;
+
+    function showDetails(index, tripId) {
+        var element = document.getElementById("trip-results-wrapper");
+        var root = document.getElementsByClassName("trip-wrapper")[index];
+
+        if (element.style.display === "none" && toggle === false) {
+            root.lastChild.appendChild(element);
+            element.style.display = "flex";
+            setDetails(tripId);
+            toggle = true;
+            return toggle;
+
+        } else if (element.style.display === "flex" && toggle === true) {
+            element.style.display = "none";
+            toggle = false;
+        }
+    }
+
+    function setDetails(tripId) {
+        //Set Event Detail pane with details about event from tripid request
+
+        var axt = new XMLHttpRequest();
+        var tripsLink = tripLinks[tripId];
+
+        axt.open('GET', root + tripsLink, true);
+        axt.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        axt.send();
+
+        axt.onreadystatechange = function () {
+            if (this.readyState === 4 && this.status === 200) {
+                var result = JSON.parse(this.responseText);
+
+                if (result.length > 0) {
+                    var j = 0;
+                    var hotelPrice = result[j].accommodation.rooms[0].price;
+                    var tripPriceA = result[j].arrivalPlan.price;
+                    var tripPriceB = result[j].departurePlan.price;
+                    var totalPrice = result[j].accommodation.rooms[0].price + tripPriceA + tripPriceB;
+                    var currency = "€";
+                    document.getElementById("trip-price").innerHTML = "ab " + hotelPrice + currency;
+                    document.getElementById("trip-name").innerHTML = result[j].accommodation.name;
+                    document.getElementById("trip-desc-gen").innerHTML = (result[j].arrivalPlan.startTime.substring(5, 10) +
+                        " bis " + result[j].departurePlan.startTime.substring(5, 10));
+
+                    document.getElementById("room-details").innerHTML = result[j].accommodation.rooms[0].description;
+                    document.getElementById("hotel-img-result").src = result[j].accommodation.media[0].uri;
+                }
+            }
+        }
+    }
+
+    window.addEventListener ?
+        window.addEventListener("load", fetchTrips(), false) :
+        window.attachEvent && window.attachEvent("onload", fetchTrips());
+
+
+
+    function fetchTrips() {
+        var axt = new XMLHttpRequest();
+        var tripsLink = sessionStorage.getItem('trips');
+
+        //axt.open('GET', tripsLink, true);
+        axt.open('GET', "assets/json/trips.json", true);
+        axt.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        axt.send();
+
+        axt.onreadystatechange = function () {
+            console.log(this.status);
+            console.log(this.readyState);
+            if (this.readyState === 4 && this.status === 200) {
+                var result = JSON.parse(this.responseText);
+
+                if (result.length > 0) {
+                    for (var j = 0; j < result.length; j++) {
+
+                        var hotelPrice = result[j].accommodation.rooms[0].price;
+                        var tripPriceA = result[j].arrivalPlan.price;
+                        var tripPriceB = result[j].departurePlan.price;
+                        var totalPrice = result[j].accommodation.rooms[0].price + tripPriceA + tripPriceB;
+                        var currency = "€";
+
+                        var tripWrapper = document.createElement("SECTION");
+                        tripWrapper.className = "trip-wrapper";
+                        tripWrapper.name = result[j].id;
+
+                        var tripWrapperArticle = document.createElement("ARTICLE");
+
+                        var tripDetails = document.createElement("DIV");
+                        tripDetails.className = "trip-details";
+
+                        var eventName = document.createElement("P");
+
+                        var eventDate = document.createElement("P");
+                        eventDate.innerHTML = result[j].arrivalPlan.startTime.substring(0, 10);
+
+                        var eventPrice = document.createElement("P");
+                        eventPrice.innerHTML = totalPrice + currency;
+
+                        var userTrip = document.createElement("ARTICLE");
+                        userTrip.className = "user-trip";
+
+                        var userTripDiv = document.createElement("DIV");
+
+                        var tripHeading = document.createElement("H3");
+                        tripHeading.innerHTML = result[j].accommodation.address.cityName;
+
+                        var tripDesc = document.createElement("H3");
+                        tripDesc.innerHTML = result[j].accommodation.address.cityName;
+
+                        var detailsBtn = document.createElement("BUTTON");
+                        detailsBtn.className = "btn-std";
+                        detailsBtn.innerHTML = "Mehr Details";
+                        detailsBtn.name = result[j].id;
+                        detailsBtn.id = j;
+                        detailsBtn.onclick = (function () {
+                            console.log(this.id);
+                            console.log(this.name);
+                            showDetails(this.id, this.name);
+                        });
+                        tripLinks[this.name] = result[this.id]._links.self.href;
+
+                        document.getElementById("trips").appendChild(tripWrapper);
+                        document.getElementById("trips").lastChild.appendChild(tripWrapperArticle);
+                        document.getElementById("trips").lastChild.lastChild.appendChild(tripDetails);
+                        document.getElementById("trips").lastChild.lastChild.lastChild.appendChild(eventName);
+                        document.getElementById("trips").lastChild.lastChild.lastChild.appendChild(eventDate);
+                        document.getElementById("trips").lastChild.lastChild.lastChild.appendChild(eventPrice);
+                        document.getElementById("trips").lastChild.appendChild(userTrip);
+                        document.getElementById("trips").lastChild.lastChild.appendChild(userTripDiv);
+                        document.getElementById("trips").lastChild.lastChild.lastChild.appendChild(tripHeading);
+                        document.getElementById("trips").lastChild.lastChild.lastChild.appendChild(tripDesc);
+                        document.getElementById("trips").lastChild.lastChild.lastChild.appendChild(detailsBtn);
+                    }
+                }
+            }
+        }
+    }
+
+    //auth
+    window.addEventListener ?
+        window.addEventListener("load", initializeUser(), false) :
+        window.attachEvent && window.attachEvent("onload", initializeUser());
+
+    window.addEventListener ?
+        window.addEventListener("load", getToken(), false) :
+        window.attachEvent && window.attachEvent("onload", getToken());
+</script>
+</body>

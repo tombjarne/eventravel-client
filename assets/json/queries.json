@@ -1,0 +1,132 @@
+[
+  {
+    "id": 42,
+    "eventId": 0,
+    "accommodation": {
+      "type": "string",
+      "name": "Citybox Oslo",
+      "rating": 0,
+      "address": {
+        "street": "string",
+        "postalCode": "string",
+        "cityName": "string",
+        "countryCode": "string",
+        "latitude": "string",
+        "longitude": "string"
+      },
+      "media": [
+        {
+          "uri": "string",
+          "category": "string"
+        }
+      ],
+      "rooms": [
+        {
+          "description": "string",
+          "beds": 0,
+          "guests": 0,
+          "price": 249,
+          "priceInCents": 0,
+          "accessUrl": "string"
+        }
+      ]
+    },
+    "arrivalPlan": {
+      "type": "TRAIN_FLEX",
+      "startTime": "2020-01-18T11:43:20.693Z",
+      "arrivalTime": "2020-01-18T11:43:20.693Z",
+      "price": 30,
+      "priceInCents": 0
+    },
+    "departurePlan": {
+      "type": "TRAIN_FLEX",
+      "startTime": "2020-01-18T11:43:20.693Z",
+      "arrivalTime": "2020-01-18T11:43:20.693Z",
+      "price": 68,
+      "priceInCents": 0
+    },
+    "eventToAccommodationSchedule": {
+      "earliestConnectionHour": 0,
+      "earliestConnectionMinute": 0,
+      "latestConnectionHour": 0,
+      "latestConnectionMinute": 0,
+      "minTransportTime": 0,
+      "maxTransportTime": 0,
+      "averageTransportTime": 0
+    },
+    "accommodationToEventSchedule": {
+      "earliestConnectionHour": 0,
+      "earliestConnectionMinute": 0,
+      "latestConnectionHour": 0,
+      "latestConnectionMinute": 0,
+      "minTransportTime": 0,
+      "maxTransportTime": 0,
+      "averageTransportTime": 0
+    }
+  },
+  {
+    "id": 0,
+    "eventId": 0,
+    "accommodation": {
+      "type": "string",
+      "name": "Radisson Blu",
+      "rating": 0,
+      "address": {
+        "street": "string",
+        "postalCode": "string",
+        "cityName": "string",
+        "countryCode": "string",
+        "latitude": "string",
+        "longitude": "string"
+      },
+      "media": [
+        {
+          "uri": "string",
+          "category": "string"
+        }
+      ],
+      "rooms": [
+        {
+          "description": "string",
+          "beds": 0,
+          "guests": 0,
+          "price": 400,
+          "priceInCents": 0,
+          "accessUrl": "string"
+        }
+      ]
+    },
+    "arrivalPlan": {
+      "type": "TRAIN_FLEX",
+      "startTime": "2020-01-18T11:43:20.693Z",
+      "arrivalTime": "2020-01-18T11:43:20.693Z",
+      "price": 23,
+      "priceInCents": 0
+    },
+    "departurePlan": {
+      "type": "TRAIN_FLEX",
+      "startTime": "2020-01-18T11:43:20.693Z",
+      "arrivalTime": "2020-01-18T11:43:20.693Z",
+      "price": 79,
+      "priceInCents": 0
+    },
+    "eventToAccommodationSchedule": {
+      "earliestConnectionHour": 0,
+      "earliestConnectionMinute": 0,
+      "latestConnectionHour": 0,
+      "latestConnectionMinute": 0,
+      "minTransportTime": 0,
+      "maxTransportTime": 0,
+      "averageTransportTime": 0
+    },
+    "accommodationToEventSchedule": {
+      "earliestConnectionHour": 0,
+      "earliestConnectionMinute": 0,
+      "latestConnectionHour": 0,
+      "latestConnectionMinute": 0,
+      "minTransportTime": 0,
+      "maxTransportTime": 0,
+      "averageTransportTime": 0
+    }
+  }
+]

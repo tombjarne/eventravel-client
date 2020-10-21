@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="google-signin-scope" content="profile email">
+    <meta name="google-signin-client_id" content="1085207145962-3l082bdi3c5fmtfg3k13n97qg5rab707.apps.googleusercontent.com">
+    <link rel="stylesheet" href="assets/styles/styles.css">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat&display=swap" rel="stylesheet">
+</head>
+<body>
+<nav id="main-nav">
+    <div>
+        <a href="./index.html">
+            <img id="top-logo" class="logo" href="./index.html" src="assets/media/img/general/jpg/down-to-town-logo.jpg">
+            <img class="logo" href="./index.html" src="assets/media/img/general/jpg/down-to-town-logo-bright.jpg">
+        </a>
+    </div>
+    <ul class="nav-elements">
+        <li class="nav-list">
+            <a class="nav-elem" href="index.html">Home</a>
+            <a class="nav-elem" id="nav-elem-trips" href="trips.html">Trips</a>
+            <a class="nav-elem">
+                <article id="notification-bell">
+                    <div id="notifier"></div>
+                    <img id="notification" src="assets/media/img/general/png/bell.png">
+                </article>
+            </a>
+            <article id="notification-container">
+                <p>Deine Benachrichtigungen:</p>
+                <ul id="notification-list">
+                </ul>
+            </article>
+            <article id="user-container">
+                <div class="g-signin2" data-onsuccess="onSignIn" data-theme="dark"></div>
+            </article>
+        </li>
+    </ul>
+</nav>
+<section id="width-maintainer">
+    <section id="search-results-sidebar">
+        <h2>Deine Suchergebnisse</h2>
+        <h3 id="search-title"><span class="highlight-pointer">|</span>Event: <span id="search-location"></span>
+        </h3>
+        <p class="search-results-desc">Wir haben
+            <span id="results-num" class="orange-highlight">0</span> Hotels gefunden.
+        </p>
+        <section id="result">
+        </section>
+    </section>
+    <section id="search-results-details-wrapper">
+        <article>
+            <div id="result-basics">
+                <div>
+                    <h2 id="trip-name" class="text-grey"></h2>
+                    <p id="hotel-name" class="text-black">{{resultDescription}}</p>
+                    <p id="trip-price" class="result-price"><span>ab</span>{{resultPrice}}</p>
+                </div>
+                <img id="hotel-img-result" class="result-basics-img">
+            </div>
+            <div>
+                <ul id="result-features">
+                    <p id="price-benefit" class="details-highlight">Preisleistung</p>
+                    <p id="rating-benefit" class="details-highlight">Bewertung</p>
+                    <p id="recommondation-benefit" class="details-highlight">Empfehlung</p>
+                </ul>
+                <h2 id="event-name" class="text-black">{{eventName}}</h2>
+                <h3 class="small-heading">Eventdetails</h3>
+                <p id=event-details" class="text-black"></p>
+            </div>
+            <div>
+                <h3 class="small-heading">Zimmerdetails</h3>
+                <p id=room-details" class="text-black"></p>
+                <h3 class="small-heading">Zusätzliche Reiseinformationen</h3>
+                <p id="travel-information" class="text-black"></p>
+            </div>
+            <table id="travel-details">
+                <tr>
+                    <th><h3>Abreise</h3></th>
+                    <th><h3>Ankunft</h3></th>
+                    <th><h3>Rückreise</h3></th>
+                </tr>
+                <tr>
+                    <td><p id="arrival" class="text-black"></p></td>
+                    <td><p id="departure" class="text-black"></p></td>
+                    <td><p id="return" class="text-black"></p></td>
+                </tr>
+            </table>
+            <table>
+                <h3 class="text-black">Deine Daten</h3>
+                <tr>
+                    <th><h3>Reisende</h3></th>
+                    <th><h3>Budget</h3></th>
+                </tr>
+                <tr>
+                    <td>
+                        <p id="adults" class="text-black"></p>
+                        <p id="children" class="text-black"></p>
+                    </td>
+                    <td>
+                        <p id="budget" class="text-black"></p>
+                        <p id="actual-budget" class="text-black"></p>
+                        <p id="total-budget" class="text-black"></p>
+                        <label class="text-black" for="total-budget">Gesamtpreis</label>
+                    </td>
+                </tr>
+            </table>
+            <button id="save-btn" onclick="saveTrip(this)">Trip speichern</button>
+        </article>
+    </section>
+</section>
+
+<script src="core/jquery-3.4.1.min.js"></script>
+<script src="https://apis.google.com/js/platform.js" async defer></script>
+<script src="core/auth.js"></script>
+<script>
+    var apiBaseUrl = "http://eventravel.online";
+    let combinationQuery;
+    let hotelCombinationsMap;
+    let selectedEvent = JSON.parse(sessionStorage.getItem('selectedEvent'));
+
+    $(function () {
+        fetchCombinations();
+        initializeUser();
+        //getToken();
+    });
+
+    function showQueryDetails(id) {
+        console.log("id: " + id);
+        let clickedIndex = parseInt(id.substr(5));
+        let index = 0;
+        let hotelCombinations = null;
+        for (let key in hotelCombinationsMap) {
+            if (index === clickedIndex)
+            {
+                console.log("hotel: " + key);
+                hotelCombinations = hotelCombinationsMap[key];
+            }
+            index++;
+        }
+        console.log(hotelCombinations[0]);
+
+        let tripDesc = $("#trip-desc");
+        let tripPrice = $("#trip-price");
+        let eventDetails = $("#event-details");
+        let eventPrice = $("#event-price");
+        let hotelName = $("#hotel-name");
+        let hotelDesc = $("#hotel-desc");
+        let hotelPrice = $("#hotel-price");
+        let departingTrain = $("#departure");
+        let arrivingTrain = $("#arrival");
+
+        if (document.getElementById("search-results-details-wrapper").style.display = "none") {
+            document.getElementById("search-results-details-wrapper").style.display = "flex";
+        }
+        
+        $("#event-name").text(selectedEvent.name);
+        $("#hotel-name").text(hotelCombinations[0].accommodation.name);
+    }
+
+    function fetchCombinations() {
+        console.log("fetching combinations");
+        combinationQuery = JSON.parse(sessionStorage.getItem("combination-query"));
+        let apiResultsPath = combinationQuery._links.results.href;
+
+        console.log(combinationQuery);
+
+        $.get(apiBaseUrl + apiResultsPath).done(function (response) {
+            let combinations = response;
+
+            console.log(combinations);
+
+            hotelCombinationsMap = [];
+            let hotelsCount = 0;
+            combinations.forEach(function (combination) {
+                let hotelName = combination.accommodation.name;
+                if (hotelCombinationsMap[hotelName] == null || hotelCombinationsMap[hotelName] === undefined) {
+                    hotelCombinationsMap[hotelName] = [];
+                    hotelsCount++;
+                }
+                hotelCombinationsMap[hotelName].push(combination);
+            });
+
+            let i = 0;
+            for (let key in hotelCombinationsMap) {
+                let hotelCombinations = hotelCombinationsMap[key];
+
+                hotelCombinations.sort((a, b) => (a.totalPriceInCents > b.totalPriceInCents) ? 1 : ((b.totalPriceInCents > a.totalPriceInCents) ? -1 : 0));
+                let combination = hotelCombinations[0];
+                //hotelCombinations.sort(function(a, b){return a.totalPriceInCents - b.totalPriceInCents});
+                //console.log(Math.round(combination.totalPriceInCents / 100) + "€ - " + combination.accommodation.name);
+
+                let totalPrice = combination.totalPriceInCents;
+                //let hotelPrice = combination.accommodation.priceInCents;
+                //let arrivalPrice = combination.arrivalPlan.priceInCents;
+                //let departurePrice = combination.departurePlan.priceInCents;
+                let currency = "€";
+
+                let resultArticle = document.createElement("ARTICLE");
+                resultArticle.className = "search-results-wrapper";
+
+                let resultWrapper = document.createElement("DIV");
+                resultWrapper.className = "result-wrapper";
+
+                let searchResults = document.createElement("DIV");
+                searchResults.className = "search-results";
+
+                let searchResultsDetails = document.createElement("DIV");
+                searchResultsDetails.className = "search-results-details";
+                //searchResultsDetails.style.backgroundImage = "url(" + combination.accommodation.media[0].uri + ")";
+                //console.log(searchResultsDetails);
+
+                let resultHeading = document.createElement("H3");
+                resultHeading.className = "result-heading";
+                resultHeading.innerHTML = combination.accommodation.name;
+
+                let resultPrice = document.createElement("result-price");
+                resultPrice.className = "result-price";
+                resultPrice.innerHTML = "ab " + Math.round(totalPrice / 100) + currency;
+
+                let resultBtn = document.createElement("BUTTON");
+                resultBtn.className = "result-btn";
+                resultBtn.id = "hotel" + i;
+                resultBtn.name = combination.accommodation.name;
+                resultBtn.innerHTML = "Mehr Details";
+                resultBtn.onclick = (function () {
+                    showQueryDetails(this.id);
+                });
+
+                document.getElementById("result").appendChild(resultArticle);
+                document.getElementById("result").lastChild.appendChild(resultWrapper);
+                document.getElementById("result").lastChild.lastChild.appendChild(searchResults);
+                document.getElementById("result").lastChild.lastChild.lastChild.appendChild(searchResultsDetails);
+                document.getElementById("result").lastChild.lastChild.lastChild.lastChild.appendChild(resultHeading);
+                document.getElementById("result").lastChild.lastChild.lastChild.lastChild.appendChild(resultPrice);
+                document.getElementById("result").lastChild.lastChild.lastChild.appendChild(resultBtn);
+                document.getElementById("results-num").innerHTML = hotelsCount;
+                document.getElementById("search-location").innerHTML = selectedEvent.name;
+                console.log("length=" + hotelCombinationsMap.length);
+
+                i++;
+            }
+        });
+    }
+
+    function saveTrip(obj) {
+        var requestLink = apiBaseUrl + sessionStorage.getItem('links').split(',')[1] +
+            sessionStorage.getItem('queryId') + "/results/" + sessionStorage.getItem('resultId')
+            + "/trip-creation";
+
+        var userToken = getToken();
+
+        if (userToken != null) {
+            axt.open('POST', requestLink, true);
+            axt.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+            axt.send(userToken);
+
+            axt.onreadystatechange = function () {
+                console.log(this.status);
+                console.log(this.readyState);
+                if (this.status === 201) {
+                    //trip erfolgreich erstellt!
+                } else {
+                    //es ist ein fehler aufgetreten!
+                }
+            }
+        }
+    }
+
+</script>
+
+</body>

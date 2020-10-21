@@ -1,0 +1,404 @@
+﻿<!DOCTYPE html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="google-signin-scope" content="profile email">
+    <meta name="google-signin-client_id" content="1085207145962-3l082bdi3c5fmtfg3k13n97qg5rab707.apps.googleusercontent.com">
+    <link href="assets/styles/jquery-ui.min.css" rel="stylesheet" type="text/css">
+    <link href="assets/styles/styles.css" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="http://code.jquery.com/ui/1.11.0/themes/smoothness/jquery-ui.css">
+</head>
+
+<body>
+<nav id="main-nav">
+    <div>
+        <a href="./index.html">
+            <img id="top-logo" class="logo" href="./index.html" src="assets/media/img/general/jpg/down-to-town-logo.jpg">
+            <img class="logo" href="./index.html" src="assets/media/img/general/jpg/down-to-town-logo-bright.jpg">
+        </a>
+    </div>
+    <ul class="nav-elements">
+        <li class="nav-list">
+            <a class="nav-elem" href="index.html">Home</a>
+            <a class="nav-elem" id="nav-elem-trips" href="trips.html">Trips</a>
+            <a class="nav-elem">
+                <article id="notification-bell">
+                    <div id="notifier"></div>
+                    <img id="notification" src="assets/media/img/general/png/bell.png">
+                </article>
+            </a>
+            <article id="notification-container">
+                <p>Deine Benachrichtigungen:</p>
+                <ul id="notification-list">
+                </ul>
+            </article>
+            <article id="user-container">
+                <div class="g-signin2" data-onsuccess="onSignIn" data-theme="dark"></div>
+            </article>
+        </li>
+    </ul>
+</nav>
+<section id="hero-shot">
+    <img id="hero-shot-logo" src="assets/media/img/general/png/down-to-town-logo.png">
+    <article id="children-details">
+        <form id="children-age-form">
+            <p id="ages-heading" class="text-black">Bitte bestätigen Sie das Alter der Kinder</p>
+            <div id="ages-wrapper"></div>
+        </form>
+        <button class="finished-btn size-btn">Fertig</button>
+    </article>
+    <a id="er-data-not-set-header" id="close-warning" class="er-data-not-set" onclick="closeWarning()">Schließen</a>
+    <article id="hero-form">
+        <div id="loader-container">
+            <h2 id="loader-text" class="text-black">Ergebnisse werden gesucht</h2>
+            <div class="loader"></div>
+        </div>
+        <form id="search-form" ref="form">
+            <div id="search-form-wrapper">
+                <div id="search-details-wrapper">
+                    <div>
+                        <input id="departure-date" class="hero-field-small  quicksearch" name="depart" type="text" placeholder="Anreise"/>
+                    </div>
+                    <div>
+                        <input id="arrival-date" class="hero-field-small quicksearch" name="arrive" type="text" placeholder="Rückreise"/>
+                    </div>
+                    <div class="number-wrapper">
+                        <img class="guest-icon" src="assets/media/img/general/png/adult.png">
+                        <button id="remove-adult-button" class="size-btn" type="button">
+                            -
+                        </button>
+                        <input id="adults-number" class="hero-field-small quicksearch" name="adultsNum" value="1" readonly/>
+                        <button id="add-adult-button" class="size-btn" type="button">
+                            +
+                        </button>
+                    </div>
+                    <div class="number-wrapper">
+                        <img class="guest-icon" src="assets/media/img/general/png/children.png">
+                        <button id="remove-child-button" class="size-btn" type="button" onclick="removeButtonValueChildren()">
+                            -
+                        </button>
+                        <input id="children-number" class="hero-field-small quicksearch" name="childrenNum" value="0" readonly/>
+                        <button id="add-child-button" class="size-btn" type="button" onclick="addButtonValueChildren()">
+                            +
+                        </button>
+                    </div>
+                </div>
+                <div id="input-field-wrapper">
+                    <input id="hero-search-field" class="quicksearch" id="destination" type="text" placeholder="Zu welchem Event möchtest du?"/>
+                    <input id="search-btn" class="btn-std" value="Los" readonly/>
+                </div>
+                <ul id="search-results-list">
+                    <div id="autocomplete-container">
+                        <li class="default-elem" id="search-results-list-elem-0"></li>
+                    </div>
+                </ul>
+                <div id="more-options">
+                    <p class="blue-text">Mehr Optionen</p>
+                </div>
+                <div id="input-options">
+                    <div class="button-desc">
+                        <p class="dark-desc-text">Dein Budget: </p>
+                        <input id="price-range-display" class="hero-field-small quicksearch" name="priceTo" type='text' placeholder="100" onkeyup="refreshPrice(this)"/>
+                        <input id="price-range" type="range" min="0" max="1500" value="100"/>
+                        <label class="price-label" id="label" for="price-range-display">€</label>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </article>
+</section>
+
+<script src="core/jquery-3.4.1.min.js"></script>
+<script src="core/jquery-ui.min.js"></script>
+<script src="https://apis.google.com/js/platform.js"></script>
+<script src="core/auth.js"></script>
+<script src="core/geolocation.js"></script>
+<script src="core/navigation.js"></script>
+<script src="core/event-autocomplete.js"></script>
+<script src="core/combination-queries.js"></script>
+<script>
+    var apiBaseUrl = "http://eventravel.online";
+    let apiEventsPath, apiTripsPath, apiNotificationsPath, apiLoginPath;
+
+    $(function () {
+        $.get(apiBaseUrl).done(function (response) {
+            apiEventsPath = response._links.events.href;
+            apiTripsPath = response._links.trips.href;
+            apiLoginPath = response._links.login.href;
+            apiNotificationsPath = response._links.notifications.href;
+        });
+
+        verifyUser();
+        initializeGeolocation();
+
+        sessionStorage.removeItem("selectedEvent");
+    });
+
+    $("#adults-number").click(function () {
+        showAlert('Benutze die Buttons, um die Werte zu verändern');
+    });
+
+    $("#search-btn").click(function () {
+        requestCombinations();
+    });
+
+    $("#children-number").click(function () {
+       $("#children-details").show();
+    });
+
+    $("#children-details button").click(function () {
+        $("#children-details").hide();
+    });
+
+    function showAlert(string) {
+        let error = $("#er-data-not-set-header");
+        error.html(string);
+        $(error).css("visibility", "visible");
+        $(error).fadeTo(100, 1, function(){
+
+        });
+        setTimeout(
+            function() {
+                $(error).fadeTo(300, 0, function(){
+                    $(error).css("visibility", "hidden");
+                });
+            }, 5000);
+    }
+
+    function closeWarning() {
+        let error = $("#er-data-not-set-header");
+        error.css("visibility", "hidden");
+    }
+
+    // add dynamically changing minDate value
+    let minDate = new Date();
+    $("#departure-date").datepicker({
+        minDate: 0,
+        numberOfMonth: 1,
+        dateFormat: 'dd.mm.yy',
+        onClose: function (selectedDate) {
+            $("#arrival-date").datepicker("option", "minDate", selectedDate);
+        }
+    });
+
+    $("#arrival-date").datepicker({
+        minDate: 0,
+        numberOfMonth: 1,
+        dateFormat: 'dd.mm.yy',
+        onClose: function () {
+            $("#departure-date").datepicker("option", "minDate");
+        }
+    });
+
+    $("#price-range").bind("input", function() {
+        $("#price-range-display").val($(this).val());
+        if ($("#price-range-display").val() >= 1500) {
+            $("#price-range-display").val($(this).val() + " +");
+        } else {
+            $("#price-range-display").val($(this).val());
+        }
+    });
+
+    $("#more-options").click(function () {
+        let extraOptions = $("#input-options");
+        if (extraOptions.css("display") === "none") {
+            extraOptions.css("display", "flex");
+            $("#more-options p").text("Weniger Optionen");
+        } else {
+            extraOptions.css("display", "none");
+            $("#more-options p").text("Mehr Optionen");
+        }
+    });
+
+    $("#add-adult-button").click(function () {
+        let input = $("#adults-number");
+        let value = parseInt(input.val());
+        if (value >= 20) {
+            if (Math.random() * 2 < 1) {
+                showAlert("Sind Sie sich sicher, in einer so großen Gruppenzahl zu reisen?");
+            } else {
+                showAlert("20 Personen sind schon viel. Halten Sie das aus?");
+            }
+        } else {
+            value += 1;
+            input.val(value);
+        }
+    });
+
+    $("#remove-adult-button").click(function () {
+        let input = $("#adults-number");
+        input.val(Math.max(1, parseInt(input.val()) - 1));
+    });
+
+    function addButtonValueChildren() {
+        let input = $("#children-number");
+        let value = parseInt(input.val());
+        if (value > 5) {
+            showAlert("Eine höhere eingabe ist nicht möglich");
+        } else if (value => 0 && value <= 5) {
+            value = value + 1;
+            input.val(value);
+            addAgeInput();
+            $("#children-details").show();
+        }
+    }
+
+    function removeButtonValueChildren() {
+        let input = $("#children-number");
+        let value = parseInt(input.val());
+        if (value > 0 && value < 7) {
+            value = value - 1;
+            input.val(value);
+            removeAgeInput();
+        }
+    }
+
+    //call when reading from cookie
+    function addAgeInput() {
+        let container = document.createElement("DIV");
+        container.className = "age-wrapper";
+
+        let input = document.createElement("INPUT");
+        input.className = "ages-input";
+        input.readOnly = "readonly";
+        input.style.cursor = "not-allowed";
+        input.value = 10;
+
+        let buttonUp = document.createElement("BUTTON");
+        buttonUp.innerHTML = "+";
+        buttonUp.className = "size-btn age-btn";
+        buttonUp.type = "button";
+        buttonUp.onclick = function () {
+            addButtonAgeChildren(this.previousSibling);
+        };
+
+        let buttonDown = document.createElement("BUTTON");
+        buttonDown.innerHTML = "-";
+        buttonDown.className = "size-btn age-btn";
+        buttonDown.type = "button";
+        buttonDown.onclick = function () {
+            removeButtonAgeChildren(this.previousSibling.previousSibling)
+        };
+
+        let buttonDel = document.createElement("BUTTON");
+        buttonDel.innerHTML = "x";
+        buttonDel.className = "size-btn delete-btn";
+        buttonDel.type = "button";
+
+        buttonDel.onclick = function () {
+            document.getElementById("children-number").value-= 1;
+            buttonDel.parentNode.parentNode.removeChild(container);
+        };
+
+        document.getElementById("ages-wrapper").appendChild(container);
+        document.getElementById("ages-wrapper").lastChild.appendChild(input);
+        document.getElementById("ages-wrapper").lastChild.appendChild(buttonUp);
+        document.getElementById("ages-wrapper").lastChild.appendChild(buttonDown);
+        document.getElementById("ages-wrapper").lastChild.appendChild(buttonDel);
+    }
+
+    function removeAgeInput() {
+        let rootElement = document.getElementById("ages-wrapper").lastChild.remove();
+    }
+
+    function addButtonAgeChildren(element) {
+        let current = parseInt(element.value);
+        if (current >= 0 && current < 18) {
+            current += 1;
+        }
+        element.value = current;
+    }
+
+    function removeButtonAgeChildren(element) {
+        let current = parseInt(element.value);
+        if (current > 0 && current <= 18) {
+            current -= 1;
+        }
+        element.value = current;
+    }
+
+    function refreshPrice(obj) {
+        document.getElementById("price-range").value = obj.value;
+    }
+
+    function setChildrenAges(obj) {
+        let container = $("#children-details");
+        let rootElement = $("#ages-heading");
+        let value = parseInt(obj.value);
+
+        for (let i = 0; i = 1; i++) {
+            let input = document.createElement("input");
+            //input.setAttribute('type', 'number');
+            //container.setAttribute('value', 7);
+            apiBaseUrl.append(input);
+        }
+        container.css("display", "block");
+    }
+
+    function getChildrenAges(length) {
+        if (length > 0) {
+            let result = document.getElementsByClassName("ages-input");
+            let ages = [];
+            let string = "";
+
+            for (let i = 0; i < length; i++) {
+                ages[i] = result[i].value;
+                string += result[i].value + ".";
+            }
+            return string + length;
+        } else {
+            return null;
+        }
+    }
+
+    window.addEventListener ?
+        window.addEventListener("load", setDetails(), false) :
+        window.attachEvent && window.attachEvent("onload", setDetails());
+
+    function setDetails() {
+        let result = document.cookie.match("(^|[^;]+)\\s*" + "USRNP" + "\\s*=\\s*([^;]+)");
+
+        if (result != null) {
+            let cookie = result.pop().split(",");
+            let departure = cookie[0].toString();
+            let arrival = cookie[1].toString();
+            console.log(result);
+
+            let d = new Date();
+            if (parseInt(d.getDate()) > parseInt(departure.substring(0, 2)) && parseInt(d.getMonth()) == parseInt(departure.substring(3, 4))) {
+                document.getElementById("departure-date").value = "";
+            } else {
+                document.getElementById("departure-date").value = departure;
+            }
+
+            if (parseInt(d.getDate()) > parseInt(arrival.substring(0, 2)) && parseInt(d.getMonth()) == parseInt(arrival.substring(3, 4))) {
+                document.getElementById("arrival-date").value = "";
+            } else {
+                document.getElementById("arrival-date").value = arrival;
+            }
+
+            let adults = cookie[2].toString();
+            document.getElementById("adults-number").value = adults;
+
+            let children = cookie[3].toString();
+            document.getElementById("children-number").value = children;
+            console.log(children);
+
+            let childrenAges = cookie[4].toString();
+            let ages = childrenAges.split(".");
+
+            for (let i = 0; i < children; i++) {
+                addAgeInput();
+                console.log("invoked");
+            }
+
+            for (let i = 0; i < children; i++) {
+                document.getElementsByClassName("ages-input")[i].value = ages[i];
+            }
+
+            let priceTo = cookie[5].toString();
+            document.getElementById("price-range-display").value = priceTo;
+        }
+    }
+</script>
+</body>

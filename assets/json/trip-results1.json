@@ -1,0 +1,67 @@
+  [
+    {
+      "id": 42,
+      "eventId": 0,
+      "accommodation": {
+        "type": "string",
+        "name": "Fosshotel Hlemmur",
+        "rating": 0,
+        "address": {
+          "street": "string",
+          "postalCode": "string",
+          "cityName": "Reykjavìk",
+          "countryCode": "string",
+          "latitude": "string",
+          "longitude": "string"
+        },
+        "media": [
+          {
+            "uri": "string",
+            "category": "string"
+          }
+        ],
+        "rooms": [
+          {
+            "description": "string",
+            "beds": 0,
+            "guests": 0,
+            "price": 400,
+            "priceInCents": 0,
+            "accessUrl": "string"
+          }
+        ]
+      },
+      "arrivalPlan": {
+        "type": "TRAIN_FLEX",
+        "startTime": "2020-01-18T12:35:24.080Z",
+        "arrivalTime": "2020-01-18T12:35:24.080Z",
+        "price": 0,
+        "priceInCents": 0
+      },
+      "departurePlan": {
+        "type": "TRAIN_FLEX",
+        "startTime": "2020-01-18T12:35:24.080Z",
+        "arrivalTime": "2020-01-18T12:35:24.080Z",
+        "price": 0,
+        "priceInCents": 0
+      },
+      "eventToAccommodationSchedule": {
+        "earliestConnectionHour": 0,
+        "earliestConnectionMinute": 0,
+        "latestConnectionHour": 0,
+        "latestConnectionMinute": 0,
+        "minTransportTime": 0,
+        "maxTransportTime": 0,
+        "averageTransportTime": 0
+      },
+      "accommodationToEventSchedule": {
+        "earliestConnectionHour": 0,
+        "earliestConnectionMinute": 0,
+        "latestConnectionHour": 0,
+        "latestConnectionMinute": 0,
+        "minTransportTime": 0,
+        "maxTransportTime": 0,
+        "averageTransportTime": 0
+      }
+    }
+  ]
